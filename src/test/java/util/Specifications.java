@@ -5,9 +5,11 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+import lombok.experimental.UtilityClass;
 
 import static io.restassured.http.ContentType.JSON;
 
+@UtilityClass
 public class Specifications {
     public static RequestSpecification requestSpecification(String url) {
         return new RequestSpecBuilder()

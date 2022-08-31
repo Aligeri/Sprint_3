@@ -1,7 +1,9 @@
 package util;
 
+import api.Courier;
 import api.Login;
 import api.Order;
+import lombok.experimental.UtilityClass;
 import responses.LoginResponseId;
 import responses.OrderResponseId;
 
@@ -13,8 +15,9 @@ import static util.Link.*;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 
+@UtilityClass
 public class UtilClass {
-    public String getCourierId(String log, String pass) {
+    public static String getCourierId(String log, String pass) {
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification200());
 
@@ -30,7 +33,7 @@ public class UtilClass {
         return response.getId();
     }
 
-    public void deleteCourierById(String id) {
+    public static void deleteCourierById(String id) {
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification200());
         when()
@@ -40,19 +43,19 @@ public class UtilClass {
         System.out.println("Deleted");
     }
 
-    public int getRandomInt() {
+    public static int getRandomInt() {
         Random random = new Random();
         return random.nextInt(9 + 1);
     }
 
-    public String getRandomDate() {
+    public static String getRandomDate() {
         int year = ThreadLocalRandom.current().nextInt(2022, 2025 + 1);
         int month = ThreadLocalRandom.current().nextInt(1, 12 + 1);
         int day = ThreadLocalRandom.current().nextInt(1, 28 + 1);
         return year + "-" + month + "-" + day;
     }
 
-    public String randomString(int len){
+    public static String randomString(int len){
         final String AB = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         SecureRandom rnd = new SecureRandom();
         StringBuilder sb = new StringBuilder(len);
@@ -61,7 +64,7 @@ public class UtilClass {
         return sb.toString();
     }
 
-    public String randomPhone(int len){
+    public static String randomPhone(int len){
         final String AB = "0123456789";
         SecureRandom rnd = new SecureRandom();
         StringBuilder sb = new StringBuilder(len);
@@ -70,7 +73,7 @@ public class UtilClass {
         return sb.toString();
     }
 
-    public String getOrderId(String firstName, String lastName, String address, int metroStation, String phone,
+    public static String getOrderId(String firstName, String lastName, String address, int metroStation, String phone,
                              Integer rentTime, String deliveryDate, String comment, String[] color) {
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification201());
@@ -95,7 +98,7 @@ public class UtilClass {
         return response.getTrack();
     }
 
-    public void deleteOrderById(String track) {
+    public static void deleteOrderById(String track) {
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification200());
         when()
@@ -103,5 +106,29 @@ public class UtilClass {
                 .then()
                 .log().all();
         System.out.println("Deleted");
+    }
+
+    public static Courier getCourier() {
+        return new Courier(UtilClass.randomString(10),
+                UtilClass.randomString(10),
+                UtilClass.randomString(10));
+    }
+
+    public static Courier getCourierWithoutLogin() {
+        return new Courier("",
+                UtilClass.randomString(10),
+                UtilClass.randomString(10));
+    }
+
+    public static Order getOrder(String[] color) {
+        return new Order(UtilClass.randomString(10),
+                UtilClass.randomString(10),
+                UtilClass.randomString(10),
+                UtilClass.getRandomInt(),
+                UtilClass.randomPhone(11),
+                UtilClass.getRandomInt(),
+                UtilClass.getRandomDate(),
+                UtilClass.randomString(10),
+                color);
     }
 }

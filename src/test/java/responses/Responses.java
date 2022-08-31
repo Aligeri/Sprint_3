@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class OrderResponseId {
-    private final String track;
+public class Responses {
+    public String message;
 }
