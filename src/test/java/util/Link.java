@@ -1,5 +1,8 @@
 package util;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public class Link {
     public static final String BASE_URI = "http://qa-scooter.praktikum-services.ru";
     public static final String COURIER_CREATION = "/api/v1/courier";

@@ -17,7 +17,6 @@ import static io.restassured.RestAssured.given;
 import static util.Link.*;
 
 public class OrderTest {
-    UtilClass utilClass = new UtilClass();
 
     public static Stream<Arguments> orderColor() {
         return Stream.of(
@@ -38,23 +37,15 @@ public class OrderTest {
     public void createOrderSuccessTest(String[] color) {
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification201());
-        Order order = new Order(utilClass.randomString(10),
-                utilClass.randomString(10),
-                utilClass.randomString(10),
-                utilClass.getRandomInt(),
-                utilClass.randomPhone(11),
-                utilClass.getRandomInt(),
-                utilClass.getRandomDate(),
-                utilClass.randomString(10),
-                color);
-        OrderListResponse response = given()
+        Order order = UtilClass.getOrder(color);
+        OrderListResponse goodResponse = given()
                 .body(order).log().all()
                 .when()
                 .post(ORDER_CREATION)
                 .then()
                 .extract().as(OrderListResponse.class);
-        Assertions.assertNotNull(response.getTrack());
-        utilClass.deleteOrderById(utilClass.getOrderId(order.getFirstName(), order.getLastName(), order.getAddress(),
+        Assertions.assertNotNull(goodResponse.getTrack());
+        UtilClass.deleteOrderById(UtilClass.getOrderId(order.getFirstName(), order.getLastName(), order.getAddress(),
                 order.getMetroStation(), order.getPhone(), order.getRentTime(), order.getDeliveryDate(),
                 order.getComment(), order.getColor()));
     }

@@ -5,7 +5,7 @@ import io.qameta.allure.Description;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import responses.BadRequest;
+import responses.Responses;
 import responses.CourierResponse;
 import responses.LoginResponseId;
 import util.Specifications;
@@ -16,7 +16,6 @@ import static util.Error.*;
 import static util.Link.*;
 
 public class LoginCourierTest {
-    UtilClass utilClass = new UtilClass();
 
     @Test
     @DisplayName("Логин курьера. Успешная авторизация")
@@ -26,29 +25,26 @@ public class LoginCourierTest {
     public void loginCourierSuccessTest() {
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification201());
-        String login = utilClass.randomString(10);
-        String pass = utilClass.randomString(10);
-        String fn = utilClass.randomString(10);
-        Courier courier = new Courier(login, pass, fn);
-        CourierResponse response = given()
+        Courier courier = UtilClass.getCourier();
+        CourierResponse goodResponse = given()
                 .body(courier)
                 .when()
                 .post(COURIER_CREATION)
                 .then().log().all()
                 .extract().as(CourierResponse.class);
-        Assert.assertTrue(response.isOk());
+        Assert.assertTrue(goodResponse.isOk());
 
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification200());
         Login authorization = new Login(courier.getLogin(), courier.getPassword());
-        LoginResponseId response1 = given()
+        LoginResponseId goodResponse1 = given()
                 .body(authorization)
                 .when()
                 .post(COURIER_LOGIN)
                 .then().log().all()
                 .extract().as(LoginResponseId.class);
-        Assert.assertNotNull(response1.getId());
-        utilClass.deleteCourierById(utilClass.getCourierId(courier.getLogin(), courier.getPassword()));
+        Assert.assertNotNull(goodResponse1.getId());
+        UtilClass.deleteCourierById(UtilClass.getCourierId(courier.getLogin(), courier.getPassword()));
     }
 
     @Test
@@ -59,29 +55,26 @@ public class LoginCourierTest {
     public void loginCourierAllRequiredFieldsIsPresentTest() {
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification201());
-        String login = utilClass.randomString(10);
-        String pass = utilClass.randomString(10);
-        String fn = utilClass.randomString(10);
-        Courier courier = new Courier(login, pass, fn);
-        CourierResponse response = given()
+        Courier courier = UtilClass.getCourier();
+        CourierResponse goodResponse = given()
                 .body(courier)
                 .when()
                 .post(COURIER_CREATION)
                 .then().log().all()
                 .extract().as(CourierResponse.class);
-        Assert.assertTrue(response.isOk());
+        Assert.assertTrue(goodResponse.isOk());
 
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification400());
         Login authorization = new Login(courier.getLogin(), "");
-        BadRequest response1 = given()
+        Responses badResponse = given()
                 .body(authorization)
                 .when()
                 .post(COURIER_LOGIN)
                 .then().log().all()
-                .extract().as(BadRequest.class);
-        Assert.assertEquals(ERROR_LOGIN_400, response1.getMessage());
-        utilClass.deleteCourierById(utilClass.getCourierId(courier.getLogin(), courier.getPassword()));
+                .extract().as(Responses.class);
+        Assert.assertEquals(ERROR_LOGIN_400, badResponse.getMessage());
+        UtilClass.deleteCourierById(UtilClass.getCourierId(courier.getLogin(), courier.getPassword()));
     }
 
     @Test
@@ -92,28 +85,25 @@ public class LoginCourierTest {
     public void loginCourierErrorOnInvalidFieldTest() {
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification201());
-        String login = utilClass.randomString(10);
-        String pass = utilClass.randomString(10);
-        String fn = utilClass.randomString(10);
-        Courier courier = new Courier(login, pass, fn);
-        CourierResponse response = given()
+        Courier courier = UtilClass.getCourier();
+        CourierResponse goodResponse = given()
                 .body(courier)
                 .when()
                 .post(COURIER_CREATION)
                 .then().log().all()
                 .extract().as(CourierResponse.class);
-        Assert.assertTrue(response.isOk());
+        Assert.assertTrue(goodResponse.isOk());
 
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification404());
         Login authorization = new Login(courier.getLogin() + "1", courier.getPassword());
-        BadRequest response1 = given()
+        Responses badResponse = given()
                 .body(authorization)
                 .when()
                 .post(COURIER_LOGIN)
                 .then().log().all()
-                .extract().as(BadRequest.class);
-        Assert.assertEquals(ERROR_LOGIN_409, response1.getMessage());
-        utilClass.deleteCourierById(utilClass.getCourierId(courier.getLogin(), courier.getPassword()));
+                .extract().as(Responses.class);
+        Assert.assertEquals(ERROR_LOGIN_409, badResponse.getMessage());
+        UtilClass.deleteCourierById(UtilClass.getCourierId(courier.getLogin(), courier.getPassword()));
     }
 }

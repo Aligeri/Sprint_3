@@ -5,7 +5,7 @@ import io.qameta.allure.Description;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import responses.BadRequest;
+import responses.Responses;
 import responses.CourierResponse;
 import util.UtilClass;
 import util.Specifications;
@@ -17,7 +17,6 @@ import static util.Link.*;
 import static util.Error.*;
 
 public class CourierTest {
-    UtilClass utilClass = new UtilClass();
 
     @Test
     @DisplayName("Создание курьера. Успешное создание курьера")
@@ -28,10 +27,7 @@ public class CourierTest {
     public void addCourierSuccessTest() {
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification201());
-        String login = utilClass.randomString(10);
-        String pass = utilClass.randomString(10);
-        String fn = utilClass.randomString(10);
-        Courier courier = new Courier(login, pass, fn);
+        Courier courier = UtilClass.getCourier();
         CourierResponse response = given()
                 .body(courier)
                 .when()
@@ -39,7 +35,7 @@ public class CourierTest {
                 .then().log().all()
                 .extract().as(CourierResponse.class);
         Assert.assertTrue(response.isOk());
-        utilClass.deleteCourierById(utilClass.getCourierId(courier.getLogin(), courier.getPassword()));
+        UtilClass.deleteCourierById(UtilClass.getCourierId(courier.getLogin(), courier.getPassword()));
     }
 
     @Test
@@ -49,29 +45,26 @@ public class CourierTest {
     public void addCourierDuplicateTest() {
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification201());
-        String login = utilClass.randomString(10);
-        String pass = utilClass.randomString(10);
-        String fn = utilClass.randomString(10);
-        Courier courier = new Courier(login, pass, fn);
-        CourierResponse response = given()
+        Courier courier = UtilClass.getCourier();
+        CourierResponse goodResponse = given()
                 .body(courier)
                 .when()
                 .post(COURIER_CREATION)
                 .then().log().all()
                 .extract().as(CourierResponse.class);
-        Assert.assertTrue(response.isOk());
+        Assert.assertTrue(goodResponse.isOk());
 
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification409());
         Courier courier1 = new Courier(courier.getLogin(), courier.getPassword(), courier.getFirstName());
-        BadRequest response1 = given()
+        Responses badResponse = given()
                 .body(courier1)
                 .when()
                 .post(COURIER_CREATION)
                 .then().log().all()
-                .extract().as((Type) BadRequest.class);
-        Assert.assertEquals(ERROR_COURIER_409, response1.getMessage());
-        utilClass.deleteCourierById(utilClass.getCourierId(courier.getLogin(), courier.getPassword()));
+                .extract().as((Type) Responses.class);
+        Assert.assertEquals(ERROR_COURIER_409, badResponse.getMessage());
+        UtilClass.deleteCourierById(UtilClass.getCourierId(courier.getLogin(), courier.getPassword()));
     }
 
     @Test
@@ -82,15 +75,13 @@ public class CourierTest {
     public void addCourierAllRequiredFieldsIsPresentTest() {
         Specifications.installSpecification(Specifications.requestSpecification(BASE_URI),
                 Specifications.responseSpecification400());
-        String pass = utilClass.randomString(10);
-        String fn = utilClass.randomString(10);
-        Courier courier = new Courier("", pass, fn);
-        BadRequest response = given()
+        Courier courier = UtilClass.getCourierWithoutLogin();
+        Responses badResponse = given()
                 .body(courier)
                 .when()
                 .post(COURIER_CREATION)
                 .then().log().all()
-                .extract().as(BadRequest.class);
-        Assert.assertEquals(ERROR_COURIER_400, response.getMessage());
+                .extract().as(Responses.class);
+        Assert.assertEquals(ERROR_COURIER_400, badResponse.getMessage());
     }
 }
